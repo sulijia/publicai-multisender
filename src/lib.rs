@@ -1,33 +1,37 @@
 // Find all our documentation at https://docs.near.org
-use near_sdk::{log, near};
-
+use near_sdk::{ext_contract, log, near, AccountId, NearToken};
+use near_sdk::json_types::U128;
+use near_contract_standards::storage_management::StorageBalance;
 // Define the contract structure
 #[near(contract_state)]
 pub struct Contract {
-    greeting: String,
 }
-
-// Define the default, which automatically initializes the contract
-impl Default for Contract {
-    fn default() -> Self {
-        Self {
-            greeting: "Hello".to_string(),
-        }
-    }
+#[ext_contract(ft_contract)]
+trait FT {
+    fn ft_transfer(&self, receiver_id: AccountId, amount: U128);
+    fn storage_deposit(
+        &mut self,
+        account_id: Option<AccountId>,
+        registration_only: Option<bool>,
+    ) -> StorageBalance;
 }
-
 // Implement the contract structure
 #[near]
 impl Contract {
-    // Public method - returns the greeting saved, defaulting to DEFAULT_GREETING
-    pub fn get_greeting(&self) -> String {
-        self.greeting.clone()
-    }
-
-    // Public method - accepts a greeting, such as "howdy", and records it
-    pub fn set_greeting(&mut self, greeting: String) {
-        log!("Saving greeting: {greeting}");
-        self.greeting = greeting;
+    #[payable]
+    pub fn batch_transfer(&mut self, token_contract: AccountId, transfers: Vec<(AccountId, U128)>) {
+        for (recipient, amount) in transfers {
+            ft_contract::ext(token_contract.clone())
+                .with_attached_deposit(NearToken::from_yoctonear(1_250_000_000_000_000_000_000))
+                // .with_static_gas(Gas::from_gas(5_500_000_000_000))
+                .storage_deposit(Some(recipient.clone()), Some(true))
+                .then(
+                    ft_contract::ext(token_contract.clone())
+                        .with_attached_deposit(NearToken::from_yoctonear(1))
+                        // .with_static_gas(Gas::from_gas(10_000_000_000_000))
+                        .ft_transfer(recipient, amount),
+                );
+        }
     }
 }
 
@@ -39,17 +43,4 @@ impl Contract {
 mod tests {
     use super::*;
 
-    #[test]
-    fn get_default_greeting() {
-        let contract = Contract::default();
-        // this test did not call set_greeting so should return the default "Hello" greeting
-        assert_eq!(contract.get_greeting(), "Hello");
-    }
-
-    #[test]
-    fn set_then_get_greeting() {
-        let mut contract = Contract::default();
-        contract.set_greeting("howdy".to_string());
-        assert_eq!(contract.get_greeting(), "howdy");
-    }
 }

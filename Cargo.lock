@@ -1694,6 +1694,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "near-contract-standards"
+version = "5.15.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4346f9ee61fed17d67b8018ac7d3d9ba1d27763e2075f85d344beb5383b178d4"
+dependencies = [
+ "near-sdk",
+]
+
+[[package]]
 name = "near-crypto"
 version = "0.30.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2366,6 +2375,7 @@ dependencies = [
 name = "publicai-multisender"
 version = "0.1.0"
 dependencies = [
+ "near-contract-standards",
  "near-sdk",
  "near-workspaces",
  "serde_json",
