@@ -21,6 +21,10 @@ trait FT {
 // Implement the contract structure
 #[near]
 impl Contract {
+    #[init]
+    pub fn new() -> Self {
+        Self {}
+    }
     #[payable]
     pub fn batch_transfer(&mut self, token_contract: AccountId, transfers: Vec<(AccountId, U128)>) {
         for (recipient, amount) in transfers {
