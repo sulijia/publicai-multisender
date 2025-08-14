@@ -1,11 +1,13 @@
 // Find all our documentation at https://docs.near.org
-use near_sdk::{ext_contract, log, near, AccountId, NearToken};
-use near_sdk::json_types::U128;
 use near_contract_standards::storage_management::StorageBalance;
+use near_sdk::json_types::U128;
+use near_sdk::{ext_contract, near, AccountId, NearToken, PanicOnDefault};
+
 // Define the contract structure
 #[near(contract_state)]
-pub struct Contract {
-}
+#[derive(PanicOnDefault)]
+pub struct Contract {}
+
 #[ext_contract(ft_contract)]
 trait FT {
     fn ft_transfer(&self, receiver_id: AccountId, amount: U128);
@@ -15,6 +17,7 @@ trait FT {
         registration_only: Option<bool>,
     ) -> StorageBalance;
 }
+
 // Implement the contract structure
 #[near]
 impl Contract {
@@ -42,5 +45,4 @@ impl Contract {
 #[cfg(test)]
 mod tests {
     use super::*;
-
 }
